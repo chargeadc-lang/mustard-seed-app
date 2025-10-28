@@ -1,109 +1,36 @@
-// ProgressScreen.js
-import React, { useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useContext, useEffect } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { ProgressContext } from '../context/ProgressContext';
+import { useNavigation } from '@react-navigation/native';
 
-export default function ProgressScreen({ navigation }) {
-  const [progress, setProgress] = useState({
-    streakDays: 0,
-    totalMessages: 0,
-    lastReflectionDate: null,
-  });
+export default function HomeScreen() {
+  const { progress, updateProgress } = useContext(ProgressContext);
+  const navigation = useNavigation();
 
   useEffect(() => {
-    const loadProgress = async () => {
-      try {
-        const saved = await AsyncStorage.getItem("progressData");
-        if (saved) setProgress(JSON.parse(saved));
-      } catch (error) {
-        console.log("Error loading progress:", error);
-      }
-    };
-    loadProgress();
-  }, []);
-
-  // Tree logic placeholder
-  const growingTree = () => {
-    // For now this just returns a static image.
-    // Later, we’ll use progress.streakDays or totalMessages
-    // to dynamically change which tree image shows.
-    return (
-      <Image
-        source={require("../assets/tree_young.png")} // replace later with dynamic growth logic
-        style={styles.treeImage}
-        resizeMode="contain"
-      />
-    );
-  };
+    console.log('HomeScreen mounted, progress:', progress);
+  }, [progress]);
 
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Tree section */}
-        <View style={styles.treeContainer}>{growingTree()}</View>
+    <View style={ flex: 1, justifyContent: "center", alignItems: "center" }>
+      <Text style={ fontSize: 22, marginBottom: 16 }>
+        Your Progress: { '{progress}' }%
+      </Text>
 
-        {/* Progress text */}
-        <View style={styles.textContainer}>
-          <Text style={styles.textLabel}>
-            🌱 Current Streak: <Text style={styles.textValue}>{progress.streakDays} days</Text>
-          </Text>
-          <Text style={styles.textLabel}>
-            💬 Total Reflections:{" "}
-            <Text style={styles.textValue}>{progress.totalMessages}</Text>
-          </Text>
-          <Text style={styles.textLabel}>
-            🗓️ Last Reflection:{" "}
-            <Text style={styles.textValue}>
-              {progress.lastReflectionDate || "No reflections yet"}
-            </Text>
-          </Text>
-        </View>
-
-        {/* Footer buttons */}
-        <View style={styles.footerButtons}>
-          <TouchableOpacity
-            style={styles.footerButton}
-            onPress={() => navigation.navigate("HomeScreen")}
-          >
-            <Text style={styles.footerButtonText}>Home</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.footerButton}
-            onPress={() => navigation.navigate("CalendarScreen")}
-          >
-            <Text style={styles.footerButtonText}>Calendar</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      <TouchableOpacity
+        onPress={() => {
+          updateProgress(progress + 10);
+          navigation.navigate("Progress");
+        }
+        style={
+          backgroundColor: "#4caf50",
+          paddingVertical: 12,
+          paddingHorizontal: 20,
+          borderRadius: 6
+        }
+      >
+        <Text style={ color: "#fff", fontSize: 18 }>Go to Progress</Text>
+      </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", paddingTop: 40 },
-  scrollContainer: { alignItems: "center", paddingBottom: 40 },
-  treeContainer: { width: "100%", alignItems: "center", marginBottom: 20 },
-  treeImage: { width: 200, height: 200 },
-  textContainer: {
-    width: "90%",
-    backgroundColor: "#f9f9f9",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
-  },
-  textLabel: { fontSize: 16, color: "#444", marginBottom: 8 },
-  textValue: { fontWeight: "700", color: "#2E7D32" },
-  footerButtons: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginTop: 10,
-  },
-  footerButton: {
-    backgroundColor: "#eee",
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    borderRadius: 10,
-  },
-  footerButtonText: { fontWeight: "600", color: "#333" },
-});
